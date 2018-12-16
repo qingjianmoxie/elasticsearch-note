@@ -360,7 +360,7 @@ public class ActionModule extends AbstractModule {
         this.clusterSettings = clusterSettings;
         this.settingsFilter = settingsFilter;
         this.actionPlugins = actionPlugins;
-        actions = setupActions(actionPlugins);
+        actions = setupActions(actionPlugins);  // todo 关注ActionRegistry 如何实现
         actionFilters = setupActionFilters(actionPlugins);
         autoCreateIndex = transportClient ? null : new AutoCreateIndex(settings, clusterSettings, indexNameExpressionResolver);
         destructiveOperations = new DestructiveOperations(settings, clusterSettings);
@@ -381,7 +381,7 @@ public class ActionModule extends AbstractModule {
         }
         if (transportClient) {
             restController = null;
-        } else {
+        } else {  // todo resthandler的初始化 跟9200的请求发送是否有关
             restController = new RestController(settings, headers, restWrapper, nodeClient, circuitBreakerService, usageService);
         }
     }

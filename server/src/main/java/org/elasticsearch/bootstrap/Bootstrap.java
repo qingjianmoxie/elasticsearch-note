@@ -272,7 +272,7 @@ final class Bootstrap {
     }
 
     /**
-     * This method is invoked by {@link Elasticsearch#main(String[])} to startup elasticsearch.
+     * This method is invoked by {@link Elasticsearch#main(String[])} to startup elasticsearch. todo 重要的启动流程
      */
     static void init(
             final boolean foreground,
@@ -288,7 +288,7 @@ final class Bootstrap {
         final SecureSettings keystore = loadSecureSettings(initialEnv);
         final Environment environment = createEnvironment(foreground, pidFile, keystore, initialEnv.settings(), initialEnv.configFile());
         try {
-            LogConfigurator.configure(environment);
+            LogConfigurator.configure(environment);   // todo 日志配置
         } catch (IOException e) {
             throw new BootstrapException(e);
         }
@@ -312,7 +312,7 @@ final class Bootstrap {
             }
 
             // fail if somebody replaced the lucene jars
-            checkLucene();
+            checkLucene();   // lucene版本确认
 
             // install the default uncaught exception handler; must be done before security is
             // initialized as we do not want to grant the runtime permission
@@ -320,7 +320,7 @@ final class Bootstrap {
             Thread.setDefaultUncaughtExceptionHandler(
                 new ElasticsearchUncaughtExceptionHandler(() -> Node.NODE_NAME_SETTING.get(environment.settings())));
 
-            INSTANCE.setup(true, environment);
+            INSTANCE.setup(true, environment);  // todo 元数据初始化
 
             try {
                 // any secure settings must be read during node construction
@@ -329,7 +329,7 @@ final class Bootstrap {
                 throw new BootstrapException(e);
             }
 
-            INSTANCE.start();
+            INSTANCE.start();   // todo 服务启动
 
             if (closeStandardStreams) {
                 closeSysError();

@@ -104,6 +104,7 @@ public abstract class Command implements Closeable {
 
     /**
      * Executes the command, but all errors are thrown.
+     * todo 命令行工具 jopt
      */
     void mainWithoutErrorHandling(String[] args, Terminal terminal) throws Exception {
         final OptionSet options = parser.parse(args);

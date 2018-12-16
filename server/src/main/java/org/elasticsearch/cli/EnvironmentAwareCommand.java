@@ -60,6 +60,9 @@ public abstract class EnvironmentAwareCommand extends Command {
         this.settingOption = parser.accepts("E", "Configure a setting").withRequiredArg().ofType(KeyValuePair.class);
     }
 
+    /**
+     * todo 获取设置的参数
+     */
     @Override
     protected void execute(Terminal terminal, OptionSet options) throws Exception {
         final Map<String, String> settings = new HashMap<>();

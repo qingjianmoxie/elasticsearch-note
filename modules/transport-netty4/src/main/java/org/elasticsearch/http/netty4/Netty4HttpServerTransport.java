@@ -311,7 +311,7 @@ public class Netty4HttpServerTransport extends AbstractLifecycleComponent implem
             serverBootstrap.option(ChannelOption.SO_REUSEADDR, reuseAddress);
             serverBootstrap.childOption(ChannelOption.SO_REUSEADDR, reuseAddress);
 
-            this.boundAddress = createBoundHttpAddress();
+            this.boundAddress = createBoundHttpAddress();  // todo 绑定9200端口
             if (logger.isInfoEnabled()) {
                 logger.info("{}", boundAddress);
             }

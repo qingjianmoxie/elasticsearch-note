@@ -246,6 +246,9 @@ public class Node implements Closeable {
         this(environment, Collections.emptyList());
     }
 
+    /**
+     * elasticsearch 模块初始化
+     */
     protected Node(final Environment environment, Collection<Class<? extends Plugin>> classpathPlugins) {
         final List<Closeable> resourcesToClose = new ArrayList<>(); // register everything we need to release in the case of an error
         boolean success = false;
@@ -299,7 +302,7 @@ public class Node implements Closeable {
                 logger.debug("using config [{}], data [{}], logs [{}], plugins [{}]",
                     environment.configFile(), Arrays.toString(environment.dataFiles()), environment.logsFile(), environment.pluginsFile());
             }
-
+            // todo plugin service 模块加载 transport-netty4  tribe 以及plugin插件的加载
             this.pluginsService = new PluginsService(tmpSettings, environment.configFile(), environment.modulesFile(), environment.pluginsFile(), classpathPlugins);
             this.settings = pluginsService.updatedSettings();
             localNodeFactory = new LocalNodeFactory(settings, nodeEnvironment.nodeId());
@@ -346,7 +349,7 @@ public class Node implements Closeable {
             final ClusterInfoService clusterInfoService = newClusterInfoService(settings, clusterService, threadPool, client,
                 listener::onNewInfo);
             final UsageService usageService = new UsageService(settings);
-
+            // todo module开始加载
             ModulesBuilder modules = new ModulesBuilder();
             // plugin modules must be added here, before others or we can get crazy injection errors...
             for (Module pluginModule : pluginsService.createGuiceModules()) {
@@ -398,7 +401,7 @@ public class Node implements Closeable {
                                                  scriptModule.getScriptService(), xContentRegistry, environment, nodeEnvironment,
                                                  namedWriteableRegistry).stream())
                 .collect(Collectors.toList());
-
+            // todo 注册对应的url
             ActionModule actionModule = new ActionModule(false, settings, clusterModule.getIndexNameExpressionResolver(),
                 settingsModule.getIndexScopedSettings(), settingsModule.getClusterSettings(), settingsModule.getSettingsFilter(),
                 threadPool, pluginsService.filterPlugins(ActionPlugin.class), client, circuitBreakerService, usageService);
@@ -428,14 +431,14 @@ public class Node implements Closeable {
             Set<String> taskHeaders = Stream.concat(
                 pluginsService.filterPlugins(ActionPlugin.class).stream().flatMap(p -> p.getTaskHeaders().stream()),
                 Stream.of("X-Opaque-Id")
-            ).collect(Collectors.toSet());
+            ).collect(Collectors.toSet()); // todo transport service 9300 tcp server初始化
             final TransportService transportService = newTransportService(settings, transport, threadPool,
                 networkModule.getTransportInterceptor(), localNodeFactory, settingsModule.getClusterSettings(), taskHeaders);
             final ResponseCollectorService responseCollectorService = new ResponseCollectorService(this.settings, clusterService);
             final SearchTransportService searchTransportService =  new SearchTransportService(settings, transportService,
                 SearchExecutionStatsCollector.makeWrapper(responseCollectorService));
             final Consumer<Binder> httpBind;
-            final HttpServerTransport httpServerTransport;
+            final HttpServerTransport httpServerTransport;  // todo 9200端口 httpserver元数据初始化
             if (networkModule.isHttpEnabled()) {
                 httpServerTransport = networkModule.getHttpServerTransportSupplier().get();
                 httpBind = b -> {
@@ -525,7 +528,7 @@ public class Node implements Closeable {
                 logger.debug("initializing HTTP handlers ...");
                 actionModule.initRestHandlers(() -> clusterService.state().nodes());
             }
-            logger.info("initialized");
+            logger.info("initialized");  // 元数据初始化完成
 
             success = true;
         } catch (IOException ex) {
@@ -586,7 +589,7 @@ public class Node implements Closeable {
 
 
     /**
-     * Start the node. If the node is already started, this method is no-op.
+     * Start the node. If the node is already started, this method is no-op. todo 服务启动
      */
     public Node start() throws NodeValidationException {
         if (!lifecycle.moveToStarted()) {
@@ -620,7 +623,7 @@ public class Node implements Closeable {
         // Start the transport service now so the publish address will be added to the local disco node in ClusterService
         TransportService transportService = injector.getInstance(TransportService.class);
         transportService.getTaskManager().setTaskResultsService(injector.getInstance(TaskResultsService.class));
-        transportService.start();
+        transportService.start();   // 内部请求发送 使用9300端口
         assert localNodeFactory.getNode() != null;
         assert transportService.getLocalNode().equals(localNodeFactory.getNode())
             : "transportService has a different local node than the factory provided";
@@ -685,7 +688,7 @@ public class Node implements Closeable {
             }
         }
 
-
+        // http server moudule 9200 Netty4HttpServerTransport 绑定的就是9200端口
         if (NetworkModule.HTTP_ENABLED.get(settings)) {
             injector.getInstance(HttpServerTransport.class).start();
         }

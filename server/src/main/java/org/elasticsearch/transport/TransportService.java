@@ -211,7 +211,7 @@ public class TransportService extends AbstractLifecycleComponent {
     protected void doStart() {
         transport.setTransportService(this);
         transport.start();
-
+        // todo binding 9300端口
         if (transport.boundAddress() != null && logger.isInfoEnabled()) {
             logger.info("{}", transport.boundAddress());
             for (Map.Entry<String, BoundTransportAddress> entry : transport.profileBoundAddresses().entrySet()) {
