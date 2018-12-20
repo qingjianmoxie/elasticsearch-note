@@ -247,7 +247,7 @@ public class Node implements Closeable {
     }
 
     /**
-     * elasticsearch 模块初始化
+     * elasticsearch 模块初始化 guice module加载
      */
     protected Node(final Environment environment, Collection<Class<? extends Plugin>> classpathPlugins) {
         final List<Closeable> resourcesToClose = new ArrayList<>(); // register everything we need to release in the case of an error
@@ -314,6 +314,9 @@ public class Node implements Closeable {
 
             final List<ExecutorBuilder<?>> executorBuilders = pluginsService.getExecutorBuilders(settings);
 
+            /**
+             * @apiNote ferraborghini 线程池的配置
+             */
             final ThreadPool threadPool = new ThreadPool(settings, executorBuilders.toArray(new ExecutorBuilder[0]));
             resourcesToClose.add(() -> ThreadPool.terminate(threadPool, 10, TimeUnit.SECONDS));
             // adds the context to the DeprecationLogger so that it does not need to be injected everywhere
